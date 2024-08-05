@@ -154,7 +154,7 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
               name="icon"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Icom</FormLabel>
+                  <FormLabel>Icon</FormLabel>
                   <FormControl>
                     <Popover>
                       <PopoverTrigger asChild>
