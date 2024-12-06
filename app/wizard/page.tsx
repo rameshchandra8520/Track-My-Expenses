@@ -29,9 +29,6 @@ const page = async () => {
           {" "}
           Let &apos;s get started by setting up your currency
         </h2>
-        <h3 className="mt-2 text-center text-sm text-muted-foreground">
-          You can change these setting at any time
-        </h3>
       </div>
       <Separator />
       <Card className="w-full">
