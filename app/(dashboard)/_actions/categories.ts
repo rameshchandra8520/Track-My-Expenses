@@ -81,7 +81,7 @@ export async function DeleteCategory(form: DeleteCategorySchemaType) {
 
     return await prisma.category.delete({
         where: {
-            name_type_userId: {
+            id_name_type_userId: {
                 userId: user.id,
                 name: parsedBody.data.name,
                 type: parsedBody.data.type
