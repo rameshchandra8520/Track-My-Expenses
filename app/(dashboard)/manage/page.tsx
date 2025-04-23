@@ -13,10 +13,12 @@ import { TransactionType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Category } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
+import type { QueryObserverResult } from "@tanstack/react-query";
 import { PlusSquare, TrashIcon, TrendingDown, TrendingUp } from "lucide-react";
 import React from "react";
 import CreateCategoryDialog from "../_components/CreateCategoryDialog";
 import DeleteCategoryDialog from "../_components/DeleteCategoryDialog";
+import EditCategoryDialog from "../_components/EditCategoryDialog";
 
 const page = () => {
   return (
@@ -116,7 +118,7 @@ const CategoriesList = ({ type }: { type: TransactionType }) => {
         {dataAvailable && (
           <div className="grid grid-flow-row gap-2 p-2 sm:grid-flow-row sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {categoriesQuery.data.map((category: Category) => (
-              <CategoryCard category={category} key={category.name} />
+              <CategoryCard category={category} key={category.name} refetch={categoriesQuery.refetch} />
             ))}
           </div>
         )}
@@ -125,7 +127,7 @@ const CategoriesList = ({ type }: { type: TransactionType }) => {
   );
 };
 
-const CategoryCard = ({ category }: { category: Category }) => {
+const CategoryCard = ({ category, refetch }: { category: Category, refetch: () => Promise<QueryObserverResult<any, Error>> }) => {
   return (
     <div className="flex border-separate flex-col justify-between rounded-md border shadow-md shadow-black/[0.1] dark:shadow-white/[0.1]">
       <div className="flex flex-col items-center gap-2 p-4">
@@ -135,7 +137,7 @@ const CategoryCard = ({ category }: { category: Category }) => {
         <span>{category.name}</span>
       </div>
 
-      <CreateCategoryDialog
+      <EditCategoryDialog
         category={category}
         trigger={
           <Button
@@ -145,6 +147,10 @@ const CategoryCard = ({ category }: { category: Category }) => {
             Edit
           </Button>
         }
+        successCallback={(updatedCategory) => {
+          // Refresh data after successful edit
+          refetch();
+        }}
       />
 
       <DeleteCategoryDialog

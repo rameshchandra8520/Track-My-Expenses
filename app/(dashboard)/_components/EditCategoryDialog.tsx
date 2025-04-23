@@ -15,8 +15,10 @@ import data from '@emoji-mart/data';
 import { useTheme } from 'next-themes';
 import { cn } from '@/lib/utils';
 
-import { UpdateCategory } from '@/actions/categories';
+// import { UpdateCategory } from '@/actions/categories';
 import { CreateCategorySchema, CreateCategorySchemaType } from '@/schema/categories';
+import { UpdateCategory } from '../_actions/categories';
+import { Category } from '@prisma/client';
 
 interface Props {
   category: Category;
@@ -31,7 +33,7 @@ const EditCategoryDialog = ({ category, successCallback, trigger }: Props) => {
     defaultValues: {
       name: category.name,
       icon: category.icon,
-      type: category.type,
+      type: category.type as "income" | "expense",
     },
   });
 
@@ -44,7 +46,7 @@ const EditCategoryDialog = ({ category, successCallback, trigger }: Props) => {
       form.reset({
         name: "",
         icon: "",
-        type: category.type,
+        type: category.type as "income" | "expense",
       });
 
       toast.success(`Category ${data.name} has been updated successfully 🎉`, {
