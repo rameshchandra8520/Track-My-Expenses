@@ -9,6 +9,7 @@ export const CreateCategorySchema = z.object({
 export type CreateCategorySchemaType = z.infer<typeof CreateCategorySchema>
 
 export const DeleteCategoryShema = z.object({
+    id: z.string(),
     name: z.string().min(3).max(20),
     type: z.enum(["income", "expense"]),
 

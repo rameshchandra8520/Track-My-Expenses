@@ -79,13 +79,11 @@ export async function DeleteCategory(form: DeleteCategorySchemaType) {
         return;
     }
 
+    // Assuming parsedBody.data.id is available from the form
     return await prisma.category.delete({
         where: {
-            id_name_type_userId: {
-                userId: user.id,
-                name: parsedBody.data.name,
-                type: parsedBody.data.type
-            }
+            id: parsedBody.data.id,
+            userId: user.id
         }
     })
 }
