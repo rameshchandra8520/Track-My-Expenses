@@ -1,59 +1,37 @@
-"use client";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { TransactionType } from "@/lib/types";
-import { cn } from "@/lib/utils";
-import {
-  CreateCategorySchema,
-  CreateCategorySchemaType,
-} from "@/schema/categories";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { CircleOff, Loader2, PlusSquare } from "lucide-react";
-import React, { ReactNode, useCallback, useState } from "react";
-import { useForm } from "react-hook-form";
-import Picker from "@emoji-mart/react";
-import data from "@emoji-mart/data";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CreateCategory } from "../_actions/categories";
-import { Category } from "@prisma/client";
-import { toast } from "sonner";
-import { useTheme } from "next-themes";
+import React, { useCallback, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { CircleOff, Loader2, PlusSquare } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import Picker from '@emoji-mart/react';
+import data from '@emoji-mart/data';
+import { useTheme } from 'next-themes';
+import { cn } from '@/lib/utils';
+
+import { UpdateCategory } from '@/actions/categories';
+import { CreateCategorySchema, CreateCategorySchemaType } from '@/schema/categories';
 
 interface Props {
-  type: TransactionType;
+  category: Category;
   successCallback: (category: Category) => void;
-  trigger?: ReactNode;
+  trigger?: React.ReactNode;
 }
 
-const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
+const EditCategoryDialog = ({ category, successCallback, trigger }: Props) => {
   const [open, setOpen] = useState(false);
   const form = useForm<CreateCategorySchemaType>({
     resolver: zodResolver(CreateCategorySchema),
     defaultValues: {
-      type,
+      name: category.name,
+      icon: category.icon,
+      type: category.type,
     },
   });
 
@@ -61,16 +39,16 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
   const theme = useTheme();
 
   const { mutate, isPending } = useMutation({
-    mutationFn: CreateCategory,
+    mutationFn: UpdateCategory,
     onSuccess: async (data: Category) => {
       form.reset({
         name: "",
         icon: "",
-        type,
+        type: category.type,
       });
 
-      toast.success(`Category ${data.name} has been created successfully 🎉`, {
-        id: "create-category",
+      toast.success(`Category ${data.name} has been updated successfully 🎉`, {
+        id: "edit-category",
       });
 
       setOpen((prev) => !prev);
@@ -80,23 +58,25 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
       });
 
       successCallback(data);
-
     },
     onError: () => {
       toast.error("Something went wrong", {
-        id: "create-category",
+        id: "edit-category",
       });
     },
   });
 
   const onSubmit = useCallback(
     (values: CreateCategorySchemaType) => {
-      toast.loading("Creating category...", {
-        id: "create-category",
+      toast.loading("Updating category...", {
+        id: "edit-category",
       }),
-        mutate(values);
+        mutate({
+          ...values,
+          id: category.id, // Include the category ID for update
+        });
     },
-    [mutate]
+    [mutate, category.id]
   );
 
   return (
@@ -109,7 +89,7 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
             variant={"ghost"}
             className="flex border-separate items-center justify-start rounded-none border-b px-3 py-3 text-muted-foreground"
           >
-            Create new
+            Edit
             <PlusSquare className="mr-2 h-4 w-4" />
           </Button>
         )}
@@ -117,14 +97,14 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            Create
+            Edit
             <span
               className={cn(
                 "m-1",
-                type === "income" ? "text-emerald-500" : "text-red-500"
+                category.type === "income" ? "text-emerald-500" : "text-red-500"
               )}
             >
-              {type}
+              {category.type}
             </span>
             category
           </DialogTitle>
@@ -194,7 +174,7 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
                     </Popover>
                   </FormControl>
                   <FormDescription>
-                    This is how your category will apprear in the app
+                    This is how your category will appear in the app
                   </FormDescription>
                 </FormItem>
               )}
@@ -214,7 +194,7 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
             </Button>
           </DialogClose>
           <Button onClick={form.handleSubmit(onSubmit)} disabled={isPending}>
-            {!isPending && "Create"}
+            {!isPending && "Update"}
             {isPending && <Loader2 className="animate-spin" />}
           </Button>
         </DialogFooter>
@@ -223,4 +203,4 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
   );
 };
 
-export default CreateCategoryDialog;
+export default EditCategoryDialog;

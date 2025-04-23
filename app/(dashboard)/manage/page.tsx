@@ -135,6 +135,18 @@ const CategoryCard = ({ category }: { category: Category }) => {
         <span>{category.name}</span>
       </div>
 
+      <CreateCategoryDialog
+        category={category}
+        trigger={
+          <Button
+            variant={"secondary"}
+            className="flex w-full border-separate items-center gap-2 rounded-t-none text-muted-foreground hover:bg-blue-500/20"
+          >
+            Edit
+          </Button>
+        }
+      />
+
       <DeleteCategoryDialog
         category={category}
         trigger={

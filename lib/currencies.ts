@@ -1,5 +1,5 @@
 export const Currencies = [
-  { value: "KHR", label: "៛ Riel", locale: "km-KH" },
+  { value: "INR", label: "₹ Rupee", locale: "hi-IN" },
   { value: "USD", label: "$ Dollar", locale: "en-US" },
   { value: "EUR", label: "€ Euro", locale: "de-DE" },
   { value: "JPY", label: "¥ Yen", locale: "ja-JP" },
