@@ -4,6 +4,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { getDaysInMonth } from "date-fns";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { getRedisClient } from "@/lib/redis";
 
 const getHistoryDataSchema = z.object({
     timeframe: z.enum(['month', 'year']),
@@ -19,28 +20,48 @@ export async function GET(request: Request) {
     }
 
     const { searchParams } = new URL(request.url);
-    const timeframe = searchParams.get('timeframe')
-    const year = searchParams.get('year')
-    const month = searchParams.get('month')
+    let timeframe = searchParams.get('timeframe')
+    let year = searchParams.get('year')
+    let month = searchParams.get('month')
 
-    const queryParams = getHistoryDataSchema.safeParse({
+    const parseResult = getHistoryDataSchema.safeParse({
         timeframe,
         year,
         month
     });
 
-
-    if (!queryParams.success) {
-        return Response.json(queryParams.error.message, {
+    if (!parseResult.success) {
+        return Response.json(parseResult.error.message, {
             status: 400,
         })
     }
 
-    const data = await getHistoryData(user.id, queryParams.data.timeframe, {
-        month: queryParams.data.month,
-        year: queryParams.data.year
+    // Redis cache lookup
+    const redis = await getRedisClient();
+    let version = await redis.get(`transactionsVersion:${user.id}`) || '0';
+    const cacheKey = parseResult.data.timeframe === 'month'
+        ? `historyData:${user.id}:${version}:month:${parseResult.data.year}:${parseResult.data.month}`
+        : `historyData:${user.id}:${version}:year:${parseResult.data.year}`;
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+        return Response.json(JSON.parse(cached));
+    }
+
+    const data = await getHistoryData(user.id, parseResult.data.timeframe, {
+        month: parseResult.data.month,
+        year: parseResult.data.year
     })
 
+    // When new version, remove old cache
+    if (version !== '0') {
+        let versionInt = parseInt(version, 10);
+        versionInt -= 1;
+        version = versionInt.toString();
+        await redis.del(`historyData:${user.id}:${version}:*`);
+    }
+
+    // cache result for 2 days
+    await redis.set(cacheKey, JSON.stringify(data), { EX: 2 * 24 * 60 * 60 });
     return Response.json(data)
 }
 

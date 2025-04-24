@@ -48,6 +48,14 @@ export async function GET(request: Request) {
         return Response.json(JSON.parse(cached));
     }
 
+    // When new version, remove old cache
+    if (version !== '0') {
+        let versionInt = parseInt(version, 10);
+        versionInt -= 1;
+        version = versionInt.toString();
+        await redisClient.del(`transactions:${user.id}:${version}:*`);
+    }
+
     console.log('Cache miss');
     const transactions = await getTransactionsHistory(
         user.id,
