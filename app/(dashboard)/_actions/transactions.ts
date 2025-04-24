@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { CreateTransactionSchema, CreateTransactionSchemaType } from "@/schema/transaction";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { getRedisClient } from "@/lib/redis";
 
 export async function CreateTransaction(form: CreateTransactionSchemaType) {
     const parsedBody = CreateTransactionSchema.safeParse(form)
@@ -95,4 +96,12 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
         })
 
     ])
+
+    // bump cache version so stale entries expire only when new data added
+    try {
+        const redis = await getRedisClient();
+        await redis.incr(`transactionsVersion:${user.id}`);
+    } catch (err) {
+        console.error("Failed to bump transactions version:", err);
+    }
 }
