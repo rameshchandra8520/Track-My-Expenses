@@ -66,7 +66,7 @@ const DeleteCategoryDialog = ({ category, trigger }: Props) => {
               deleteMutation.mutate({
                 id: category.id,
                 name: category.name,
-                type: category.type as TransactionType,
+                type: category.type as "income" | "expense"
               });
             }}
           >

@@ -49,6 +49,17 @@ const page = async () => {
                 trigger={
                   <Button
                     variant={"outline"}
+                    className="border-blue-500 bg-blue-950 text-white hover:bg-blue-700 hover:text-white"
+                  >
+                    Add using AI 🤖
+                  </Button>
+                }
+                type="ai"
+              />
+              <CreateTransactionDialog
+                trigger={
+                  <Button
+                    variant={"outline"}
                     className="border-emerald-500 bg-emerald-950 text-white hover:bg-emerald-700 hover:text-white"
                   >
                     New Income 😊
@@ -68,17 +79,6 @@ const page = async () => {
                 }
                 type="expense"
               />
-              {/* <CreateTransactionDialog
-                trigger={
-                  <Button
-                    variant={"outline"}
-                    className="border-blue-500 bg-blue-950 text-white hover:bg-blue-700 hover:text-white"
-                  >
-                    Add using AI 🤖
-                  </Button>
-                }
-                type="ai"
-              /> */}
             </div>
           </div>
         </div>

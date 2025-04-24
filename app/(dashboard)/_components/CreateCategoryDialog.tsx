@@ -50,10 +50,14 @@ interface Props {
 
 const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
   const [open, setOpen] = useState(false);
+  
+  // Convert 'ai' type to 'expense' for category creation
+  const categoryType = type === 'ai' ? 'expense' : type;
+  
   const form = useForm<CreateCategorySchemaType>({
     resolver: zodResolver(CreateCategorySchema),
     defaultValues: {
-      type,
+      type: categoryType,
     },
   });
 
@@ -66,7 +70,7 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
       form.reset({
         name: "",
         icon: "",
-        type,
+        type: categoryType,
       });
 
       toast.success(`Category ${data.name} has been created successfully 🎉`, {
@@ -121,10 +125,10 @@ const CreateCategoryDialog = ({ type, successCallback, trigger }: Props) => {
             <span
               className={cn(
                 "m-1",
-                type === "income" ? "text-emerald-500" : "text-red-500"
+                categoryType === "income" ? "text-emerald-500" : "text-red-500"
               )}
             >
-              {type}
+              {type === "ai" ? "expense" : type}
             </span>
             category
           </DialogTitle>
