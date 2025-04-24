@@ -35,6 +35,9 @@ model Transaction {
   categoryIcon String
   createAt     DateTime @default(now())
   updateAt     DateTime @default(now())
+
+  @@index([date])
+  @@index([userId])
 }
 
 model MonthHistory {

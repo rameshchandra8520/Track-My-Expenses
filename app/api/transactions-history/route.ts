@@ -15,6 +15,8 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const from = searchParams.get('from');
     const to = searchParams.get('to');
+    const pageString = searchParams.get('page') || '1';
+    const pageSizeString = searchParams.get('pageSize') || '10';
 
     const queryParams = OverViewQuerySchema.safeParse({
         from,
@@ -30,14 +32,22 @@ export async function GET(request: Request) {
     const transactions = await getTransactionsHistory(
         user.id,
         queryParams.data.from,
-        queryParams.data.to
+        queryParams.data.to,
+        parseInt(pageString),
+        parseInt(pageSizeString)
     )
     return Response.json(transactions);
 }
 
 export type GetTransactionHistoryResponseType = Awaited<ReturnType<typeof getTransactionsHistory>>;
 
-async function getTransactionsHistory(userId: string, from: Date, to: Date) {
+async function getTransactionsHistory(
+    userId: string, 
+    from: Date, 
+    to: Date,
+    page: number = 1,
+    pageSize: number = 10
+) {
     const userSettings = await prisma.userSettings.findUnique({
         where: {
             userId
@@ -59,7 +69,9 @@ async function getTransactionsHistory(userId: string, from: Date, to: Date) {
         },
         orderBy: {
             date: 'asc'
-        }
+        },
+        skip: (page - 1) * pageSize,
+        take: pageSize
     });
 
     return transactions.map((transaction) => ({

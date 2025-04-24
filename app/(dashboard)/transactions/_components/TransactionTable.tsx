@@ -141,12 +141,12 @@ function TransactionTable({ from, to }: Props) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const history = useQuery<GetTransactionHistoryResponseType>({
-    queryKey: ["transactions", "history", from, to],
+    queryKey: ["transactions", "history", from, to, 1],
     queryFn: () =>
       fetch(
         `/api/transactions-history?from=${DateToUTCDate(
           from
-        )}&to=${DateToUTCDate(to)}`
+        )}&to=${DateToUTCDate(to)}&page=1&pageSize=20`
       ).then((res) => res.json()),
   });
 
